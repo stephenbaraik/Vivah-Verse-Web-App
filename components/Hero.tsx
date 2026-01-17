@@ -74,20 +74,19 @@ export const Hero: React.FC<HeroProps> = ({
         key={d}
         onClick={() => !isPast && !isBooked && handleDateClick(d)}
         disabled={isPast || isBooked}
-        className={`
-          h-12 w-12 rounded-full flex items-center justify-center text-lg font-medium transition-all duration-300 relative group
-          ${isSelected 
-            ? 'bg-gradient-gold text-white shadow-lg scale-110 z-10' 
-            : isPast 
-              ? 'text-gray-200 cursor-not-allowed' 
-              : isBooked
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : isGold
-                   ? 'border-2 border-vivah-gold/40 text-vivah-gold hover:bg-vivah-gold hover:text-white font-bold'
-                   : 'text-vivah-burgundy/80 hover:bg-vivah-petal hover:scale-110'
-          }
-        `}
-      >
+                  className={`
+                  h-12 w-12 rounded-full flex items-center justify-center text-lg font-medium transition-all duration-300 relative group
+                  ${isSelected 
+                    ? 'bg-gradient-gold text-white shadow-lg animate-pop-in z-10' 
+                    : isPast 
+                      ? 'text-gray-200 cursor-not-allowed' 
+                      : isBooked
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : isGold
+                           ? 'border-2 border-vivah-gold/40 text-vivah-gold hover:bg-vivah-gold hover:text-white font-bold'
+                           : 'text-vivah-burgundy/80 hover:bg-vivah-petal hover:scale-110'
+                  }
+                `}      >
         {d}
         {isGold && !isBooked && !isPast && !isSelected && (
            <span className="absolute -top-1 -right-1 w-2 h-2 bg-vivah-gold rounded-full"></span>

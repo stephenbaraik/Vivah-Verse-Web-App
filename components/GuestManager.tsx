@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GlassCard } from './GlassCard';
 import { Guest } from '../types';
-import { Users, Copy, CheckCircle, Search, UserPlus, Home, Utensils, Phone, ArrowLeft } from 'lucide-react';
+import { Users, Copy, Search, UserPlus, Home, Utensils, Phone, ArrowLeft, Trash2, Edit } from 'lucide-react';
 
 interface GuestManagerProps {
   onBack: () => void;
@@ -15,23 +15,121 @@ const MOCK_GUESTS: Guest[] = [
   { id: '5', name: 'Vikram Malhotra', mobile: '+91 9876543214', status: 'Invited', mealPreference: 'Jain' },
 ];
 
+const GuestForm: React.FC<{ guest: Partial<Guest> | null, onSave: (guest: Partial<Guest>) => void, onCancel: () => void }> = ({ guest, onSave, onCancel }) => {
+  const [formData, setFormData] = useState(guest || {});
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Name</label>
+        <input type="text" name="name" value={formData.name || ''} onChange={handleChange} className="mt-1 block w-full p-2 border rounded-lg focus:ring-vivah-rose focus:border-vivah-rose" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Mobile</label>
+        <input type="text" name="mobile" value={formData.mobile || ''} onChange={handleChange} className="mt-1 block w-full p-2 border rounded-lg focus:ring-vivah-rose focus:border-vivah-rose" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Status</label>
+        <select name="status" value={formData.status || 'Invited'} onChange={handleChange} className="mt-1 block w-full p-2 border rounded-lg focus:ring-vivah-rose focus:border-vivah-rose">
+          <option>Invited</option>
+          <option>Confirmed</option>
+          <option>Pending</option>
+          <option>Declined</option>
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Meal Preference</label>
+        <select name="mealPreference" value={formData.mealPreference || 'Veg'} onChange={handleChange} className="mt-1 block w-full p-2 border rounded-lg focus:ring-vivah-rose focus:border-vivah-rose">
+          <option>Veg</option>
+          <option>Non-Veg</option>
+          <option>Jain</option>
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Room Assigned</label>
+        <input type="text" name="roomAssigned" value={formData.roomAssigned || ''} onChange={handleChange} className="mt-1 block w-full p-2 border rounded-lg focus:ring-vivah-rose focus:border-vivah-rose" />
+      </div>
+      <div className="flex justify-end space-x-4 pt-4">
+        <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-200 rounded-lg font-bold hover:bg-gray-300 transition-colors">Cancel</button>
+        <button type="submit" className="px-6 py-2 bg-vivah-burgundy text-white rounded-lg font-bold hover:bg-vivah-rose transition-colors">Save Guest</button>
+      </div>
+    </form>
+  );
+};
+
+
 export const GuestManager: React.FC<GuestManagerProps> = ({ onBack }) => {
   const [guests, setGuests] = useState<Guest[]>(MOCK_GUESTS);
-  const [filter, setFilter] = useState<'All' | 'Confirmed' | 'Pending'>('All');
+  const [filter, setFilter] = useState<'All' | 'Confirmed' | 'Pending' | 'Declined'>('All');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingGuest, setEditingGuest] = useState<Partial<Guest> | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleAddGuest = () => {
+    setEditingGuest({});
+    setIsModalOpen(true);
+  };
+
+  const handleEditGuest = (guest: Guest) => {
+    setEditingGuest(guest);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteGuest = (guestId: string) => {
+    setGuests(guests.filter(g => g.id !== guestId));
+  };
+
+  const handleSaveGuest = (guestData: Partial<Guest>) => {
+    if (guestData.id) {
+      setGuests(guests.map(g => g.id === guestData.id ? { ...g, ...guestData } as Guest : g));
+    } else {
+      setGuests([...guests, { ...guestData, id: String(Date.now()) } as Guest]);
+    }
+    setIsModalOpen(false);
+    setEditingGuest(null);
+  };
   
   const inviteLink = "vivahverse.com/rahul-priya";
   
-  const filteredGuests = guests.filter(g => filter === 'All' || g.status === filter);
+  const filteredGuests = guests
+    .filter(g => filter === 'All' || g.status === filter)
+    .filter(g => g.name.toLowerCase().includes(searchTerm.toLowerCase()));
   
   const stats = {
     total: guests.length,
     confirmed: guests.filter(g => g.status === 'Confirmed').length,
-    pending: guests.filter(g => g.status === 'Pending').length,
+    pending: guests.filter(g => g.status === 'Pending' || g.status === 'Invited').length,
     veg: guests.filter(g => g.mealPreference === 'Veg').length,
   };
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 animate-fade-in">
+       {/* Modal */}
+       {isModalOpen && (
+         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
+           <GlassCard className="w-full max-w-md p-8 bg-white/80">
+             <h2 className="text-2xl font-bold text-vivah-burgundy mb-6">{editingGuest?.id ? 'Edit Guest' : 'Add New Guest'}</h2>
+             <GuestForm 
+               guest={editingGuest}
+               onSave={handleSaveGuest}
+               onCancel={() => {
+                 setIsModalOpen(false);
+                 setEditingGuest(null);
+               }}
+             />
+           </GlassCard>
+         </div>
+       )}
+
        {/* Nav */}
        <button onClick={onBack} className="flex items-center text-vivah-burgundy/50 hover:text-vivah-burgundy transition-colors mb-8">
             <ArrowLeft size={18} className="mr-2" /> Back to Dashboard
@@ -44,11 +142,11 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ onBack }) => {
               <div className="flex items-center gap-3 bg-white/40 border border-white/60 px-4 py-2 rounded-xl">
                   <span className="text-sm font-bold text-vivah-burgundy/60 uppercase">Your Wedding Website:</span>
                   <a href="#" className="text-vivah-rose font-bold hover:underline">{inviteLink}</a>
-                  <button className="text-vivah-burgundy/40 hover:text-vivah-burgundy"><Copy size={16} /></button>
+                  <button onClick={() => navigator.clipboard.writeText(inviteLink)} className="text-vivah-burgundy/40 hover:text-vivah-burgundy"><Copy size={16} /></button>
               </div>
           </div>
           
-          <button className="px-6 py-3 bg-vivah-burgundy text-white rounded-full font-bold flex items-center gap-2 hover:bg-vivah-rose transition-colors shadow-lg">
+          <button onClick={handleAddGuest} className="px-6 py-3 bg-vivah-burgundy text-white rounded-full font-bold flex items-center gap-2 hover:bg-vivah-rose transition-colors shadow-lg hover:scale-105 transform">
               <UserPlus size={18} /> Add Guest
           </button>
        </div>
@@ -78,7 +176,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ onBack }) => {
            {/* Filters */}
            <div className="p-6 border-b border-vivah-burgundy/5 flex justify-between items-center bg-white/40">
                <div className="flex gap-2">
-                   {['All', 'Confirmed', 'Pending'].map(f => (
+                   {['All', 'Confirmed', 'Pending', 'Declined'].map(f => (
                        <button 
                          key={f} 
                          onClick={() => setFilter(f as any)}
@@ -90,7 +188,12 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ onBack }) => {
                </div>
                <div className="relative">
                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-vivah-burgundy/40" />
-                   <input type="text" placeholder="Search guests..." className="pl-10 pr-4 py-2 rounded-full bg-white/60 border-none focus:ring-2 focus:ring-vivah-rose/20 text-sm" />
+                   <input 
+                     type="text" 
+                     placeholder="Search guests..." 
+                     value={searchTerm}
+                     onChange={(e) => setSearchTerm(e.target.value)}
+                     className="pl-10 pr-4 py-2 rounded-full bg-white/60 border-none focus:ring-2 focus:ring-vivah-rose/20 text-sm w-48" />
                </div>
            </div>
 
@@ -106,7 +209,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ onBack }) => {
            {/* Rows */}
            <div className="divide-y divide-vivah-burgundy/5">
                {filteredGuests.map(guest => (
-                   <div key={guest.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/60 transition-colors">
+                   <div key={guest.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/60 transition-colors animate-fade-in">
                        <div className="col-span-3">
                            <p className="font-bold text-vivah-burgundy">{guest.name}</p>
                            <p className="text-xs text-vivah-burgundy/50 flex items-center gap-1 mt-1"><Phone size={10}/> {guest.mobile}</p>
@@ -115,8 +218,8 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ onBack }) => {
                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                                guest.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' :
                                guest.status === 'Pending' ? 'bg-orange-100 text-orange-700' :
-                               guest.status === 'Declined' ? 'bg-red-100 text-red-700' :
-                               'bg-gray-100 text-gray-600'
+                               guest.status === 'Invited' ? 'bg-blue-100 text-blue-700' :
+                               'bg-red-100 text-red-700'
                            }`}>
                                {guest.status}
                            </span>
@@ -135,8 +238,13 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ onBack }) => {
                                </button>
                            )}
                        </div>
-                       <div className="col-span-2 text-right">
-                           <button className="text-vivah-burgundy/40 hover:text-vivah-rose text-sm font-bold">Edit</button>
+                       <div className="col-span-2 text-right flex justify-end gap-2">
+                           <button onClick={() => handleEditGuest(guest)} className="text-vivah-burgundy/40 hover:text-vivah-rose p-2 rounded-full hover:bg-white transition-colors">
+                               <Edit size={14} />
+                           </button>
+                           <button onClick={() => handleDeleteGuest(guest.id)} className="text-vivah-burgundy/40 hover:text-red-500 p-2 rounded-full hover:bg-white transition-colors">
+                               <Trash2 size={14} />
+                           </button>
                        </div>
                    </div>
                ))}
