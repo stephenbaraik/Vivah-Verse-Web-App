@@ -9,9 +9,6 @@ import { VenueDetails } from './components/booking/VenueDetails';
 import { AuthScreen } from './components/auth/AuthScreen';
 import PaymentScreen from './components/booking/PaymentScreen';
 import BookingSuccess from './components/booking/BookingSuccess';
-import { VendorServiceList } from './components/vendor/VendorServiceList';
-import { VendorForm } from './components/vendor/VendorForm';
-import { VendorDashboard } from './components/vendor/VendorDashboard';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { GuestManager } from './components/dashboard/GuestManager';
 import { BudgetTracker } from './components/dashboard/BudgetTracker';
@@ -28,13 +25,12 @@ import { Problem } from './components/landing/Problem';
 import { Solution } from './components/landing/Solution';
 import { BusinessModel } from './components/landing/BusinessModel';
 import { Sustainability } from './components/landing/Sustainability';
-import { Team } from './components/landing/Team';
 import { TargetAudience } from './components/landing/TargetAudience';
 import { CurrentStage } from './components/landing/CurrentStage';
 import { Blog } from './components/blog/Blog';
 import { BlogPost } from './components/blog/BlogPost';
-import { MOCK_VENDOR_SERVICES, PACKAGES } from './constants';
-import { AppView, Venue, UserPreferences, PackageTier, DashboardView } from './types';
+import { PACKAGES } from './constants';
+import { AppView, Venue, UserPreferences, PackageTier, DashboardView, VendorService } from './types';
 import { authService } from './services/authService';
 import { MessageCircle, ArrowLeft } from 'lucide-react';
 
@@ -47,6 +43,201 @@ const PROTECTED_VIEWS = [
   AppView.LEGAL_AID,
   AppView.BOOKING_SUCCESS
 ];
+
+// Mock vendor services (moved from constants for inline use)
+const MOCK_VENDOR_SERVICES: VendorService[] = [
+  {
+    id: '1',
+    businessName: 'Blossom & Bloom',
+    category: 'Decor',
+    priceRange: '₹1,00,000 - ₹5,00,000',
+    priceValue: 300000,
+    description: 'Specializing in pastel floral arrangements and elegant mandap designs.',
+    image: 'https://picsum.photos/id/106/800/600',
+    rating: 4.8,
+    isEcoFriendly: true
+  },
+  {
+    id: '2',
+    businessName: 'Spice Symphony Catering',
+    category: 'Catering',
+    priceRange: '₹1,500 - ₹3,000 per plate',
+    priceValue: 2000,
+    description: 'Authentic Indian flavors mixed with global cuisines for a delightful feast.',
+    image: 'https://picsum.photos/id/292/800/600',
+    rating: 4.7
+  },
+  {
+    id: '3',
+    businessName: 'Candid Moments Studio',
+    category: 'Photography',
+    priceRange: '₹80,000 - ₹2,00,000',
+    priceValue: 150000,
+    description: 'Capturing the unscripted moments of joy and love on your big day.',
+    image: 'https://picsum.photos/id/338/800/600',
+    rating: 4.9
+  },
+  {
+    id: '4',
+    businessName: 'Glow by Priya',
+    category: 'Makeup',
+    priceRange: '₹25,000 - ₹50,000',
+    priceValue: 35000,
+    description: 'Expert bridal makeup artist focusing on natural and radiant looks.',
+    image: 'https://picsum.photos/id/64/800/600',
+    rating: 4.6
+  },
+  {
+    id: '5',
+    businessName: 'Beats & Bass DJs',
+    category: 'Entertainment',
+    priceRange: '₹40,000 - ₹1,00,000',
+    priceValue: 50000,
+    description: 'High-energy DJ services to keep the dance floor packed all night.',
+    image: 'https://picsum.photos/id/158/800/600',
+    rating: 4.5
+  },
+  {
+    id: '6',
+    businessName: 'Vintage Vibe Decor',
+    category: 'Decor',
+    priceRange: '₹2,00,000 - ₹8,00,000',
+    priceValue: 500000,
+    description: 'Rustic and vintage themes with extensive lighting setups.',
+    image: 'https://picsum.photos/id/364/800/600',
+    rating: 4.7,
+    isEcoFriendly: true
+  },
+  {
+    id: '7',
+    businessName: 'Acharya Shukla',
+    category: 'Pundit',
+    priceRange: '₹21,000 - ₹51,000',
+    priceValue: 21000,
+    description: 'Vedic rituals expert. Specializes in North Indian and Arya Samaj weddings.',
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Pundit',
+    rating: 5.0
+  },
+  {
+    id: '10',
+    businessName: 'Pandit Iyer',
+    category: 'Pundit',
+    priceRange: '₹25,000 - ₹60,000',
+    priceValue: 25000,
+    description: 'Authentic Tamil Brahmin rituals. Expert in South Indian wedding ceremonies.',
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Iyer',
+    rating: 4.9
+  },
+  {
+    id: '11',
+    businessName: 'Mukherjee Moshai',
+    category: 'Pundit',
+    priceRange: '₹15,000 - ₹40,000',
+    priceValue: 15000,
+    description: 'Traditional Bengali Purohit for Biye. Knowledgeable in all Bengali rituals.',
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mukherjee',
+    rating: 4.8
+  },
+  {
+    id: '8',
+    businessName: 'Dance with Divya',
+    category: 'Choreography',
+    priceRange: '₹50,000 - ₹1,00,000',
+    priceValue: 50000,
+    description: 'Sangeet choreography with remote video tutorials and on-site rehearsals.',
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Divya',
+    rating: 4.8
+  },
+  {
+    id: '9',
+    businessName: 'Royal Safa & Draping',
+    category: 'Styling',
+    priceRange: '₹15,000 - ₹30,000',
+    priceValue: 15000,
+    description: 'Professional saree draping and turban tying services on venue.',
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Safa',
+    rating: 4.9
+  }
+];
+
+// Vendor Service List Component (inline to avoid missing file)
+const VendorServiceList: React.FC<{ bookedServiceIds: string[]; onToggleService: (id: string) => void }> = ({ bookedServiceIds, onToggleService }) => {
+  const categories = ['All', 'Decor', 'Catering', 'Photography', 'Makeup', 'Entertainment', 'Pundit', 'Choreography', 'Styling'];
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const filteredServices = selectedCategory === 'All' 
+    ? MOCK_VENDOR_SERVICES 
+    : MOCK_VENDOR_SERVICES.filter(s => s.category === selectedCategory);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex flex-wrap gap-4 mb-8">
+        {categories.map(category => (
+          <button
+            key={category}
+            onClick={() => setSelectedCategory(category)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              selectedCategory === category 
+                ? 'bg-vivah-burgundy text-white shadow-lg' 
+                : 'bg-white/60 text-vivah-burgundy hover:bg-white'
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredServices.map(service => (
+          <div 
+            key={service.id}
+            className={`bg-white rounded-2xl overflow-hidden shadow-lg transition-all hover:shadow-xl ${
+              bookedServiceIds.includes(service.id) ? 'ring-2 ring-vivah-gold' : ''
+            }`}
+          >
+            <div className="relative h-48 overflow-hidden">
+              <img 
+                src={service.image} 
+                alt={service.businessName}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-vivah-burgundy">
+                {service.category}
+              </div>
+              {service.isEcoFriendly && (
+                <div className="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                  <span>🌿</span> Eco
+                </div>
+              )}
+            </div>
+            
+            <div className="p-5">
+              <h3 className="text-lg font-bold text-vivah-burgundy mb-1">{service.businessName}</h3>
+              <div className="flex items-center gap-1 mb-2">
+                <span className="text-sm text-gray-500">{service.rating} ★</span>
+              </div>
+              <p className="text-gray-600 text-sm mb-3">{service.description}</p>
+              
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-vivah-rose">{service.priceRange}</span>
+                <button
+                  onClick={() => onToggleService(service.id)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    bookedServiceIds.includes(service.id)
+                      ? 'bg-vivah-gold text-white'
+                      : 'bg-vivah-petal text-vivah-burgundy hover:bg-vivah-rose hover:text-white'
+                  }`}
+                >
+                  {bookedServiceIds.includes(service.id) ? 'Selected' : 'Add Service'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 function App() {
   const [currentView, setCurrentView] = useState<AppView>(AppView.HOME);
@@ -309,22 +500,6 @@ function App() {
         return <Blog onNavigate={handleNavigateToPost} />;
       case AppView.BLOG_POST:
         return <BlogPost slug={selectedBlogPost!} onBack={handleBackToBlog} />;
-      case AppView.VENDOR_PORTAL:
-        return (
-          <div className="relative">
-            <VendorForm />
-            <div className="fixed bottom-4 left-4 z-50">
-              <button 
-                onClick={() => setCurrentView(AppView.VENDOR_DASHBOARD)} 
-                className="px-4 py-2 bg-gray-900 text-white rounded text-xs opacity-50 hover:opacity-100"
-              >
-                Demo: View Vendor Analytics
-              </button>
-            </div>
-          </div>
-        );
-      case AppView.VENDOR_DASHBOARD:
-        return <VendorDashboard />;
       default:
         return (
           <Hero 
@@ -389,4 +564,3 @@ function App() {
 }
 
 export default App;
-
