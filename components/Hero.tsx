@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, ArrowRight, Calendar as CalendarIcon, Shield, UserCheck, Search, LayoutTemplate, Star, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, ArrowRight, Calendar as CalendarIcon, Shield, UserCheck, Search, LayoutTemplate, Star, CheckCircle, MessageSquare, FileSignature, Users, Zap } from 'lucide-react';
 import { GlassCard } from './GlassCard';
 import { isAuspiciousDate, isBookedDate } from '../constants';
 
@@ -115,11 +115,11 @@ export const Hero: React.FC<HeroProps> = ({
 
             <div>
                 <h1 className="font-sans font-light text-8xl md:text-[9rem] lg:text-[10rem] text-vivah-burgundy leading-[0.85] tracking-tighter mb-8">
-                From <span className="text-gradient-gold font-semibold">Muhurat</span><br/> to <span className="font-semibold bg-clip-text text-transparent bg-gradient-to-r from-vivah-burgundy to-pink-600">Memories</span>.
+                Your Wedding,<br/> <span className="text-gradient-gold font-semibold">Stress-Free.</span>
                 </h1>
                 
                 <p className="font-sans text-2xl md:text-3xl text-vivah-burgundy/70 max-w-2xl font-light leading-relaxed mx-auto lg:mx-0">
-                Secure your auspicious date and let our <span className="text-vivah-burgundy font-medium border-b-2 border-vivah-gold/30">AI Concierge</span> handle the rest.
+                We manage the entire wedding end-to-end, so you can enjoy the celebration.
                 </p>
             </div>
             
@@ -188,16 +188,16 @@ export const Hero: React.FC<HeroProps> = ({
 
       <div className="max-w-[85rem] mx-auto px-6">
         <div className="text-center mb-24">
-          <h2 className="text-4xl md:text-5xl font-light text-vivah-burgundy mb-6 tracking-tight">The <span className="font-semibold text-gradient-gold">Golden</span> Path</h2>
+          <h2 className="text-4xl md:text-5xl font-light text-vivah-burgundy mb-6 tracking-tight">Your Journey to a <span className="font-semibold text-gradient-gold">Perfect Wedding</span></h2>
           <div className="w-20 h-1.5 bg-vivah-gold mx-auto opacity-50 rounded-full"></div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
            {[
-             { icon: CalendarIcon, title: "Muhurat", desc: "Select a spiritually aligned date." },
-             { icon: Search, title: "Curate", desc: "AI tailored packages & venues." },
-             { icon: LayoutTemplate, title: "Customize", desc: "Swap vendors, adjust budget." },
-             { icon: CheckCircle, title: "Celebrate", desc: "We manage the chaos." }
+             { icon: MessageSquare, title: "Consultation", desc: "Share your vision and budget with us." },
+             { icon: Users, title: "Vendor Matching", desc: "We shortlist the best-fit vendors for you." },
+             { icon: FileSignature, title: "Contracting", desc: "Sign a single contract. We handle the rest." },
+             { icon: Zap, title: "Execution", desc: "Enjoy your wedding while we manage everything." }
            ].map((step, idx) => (
              <div 
                 key={idx} 

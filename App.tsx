@@ -22,6 +22,13 @@ import { WeddingPlannerAI } from './components/WeddingPlannerAI';
 import { InspirationBoard } from './components/InspirationBoard';
 import { AIOnboarding } from './components/AIOnboarding';
 import { PackageSelection } from './components/PackageSelection';
+import { Problem } from './components/Problem';
+import { Solution } from './components/Solution';
+import { BusinessModel } from './components/BusinessModel';
+import { Sustainability } from './components/Sustainability';
+import { Team } from './components/Team';
+import { TargetAudience } from './components/TargetAudience';
+import { CurrentStage } from './components/CurrentStage';
 import { MOCK_VENDOR_SERVICES } from './constants';
 import { AppView, Venue, UserPreferences, PackageTier } from './types';
 import { MessageCircle, ArrowLeft } from 'lucide-react';
@@ -96,11 +103,20 @@ function App() {
     switch (currentView) {
       case AppView.HOME:
         return (
-          <Hero 
-            selectedDate={weddingDate}
-            onDateChange={setWeddingDate}
-            onStart={handleStartPlanning}
-          />
+          <>
+            <Hero 
+              selectedDate={weddingDate}
+              onDateChange={setWeddingDate}
+              onStart={handleStartPlanning}
+            />
+            <Problem />
+            <Solution />
+            <BusinessModel />
+            <Sustainability />
+            <Team />
+            <TargetAudience />
+            <CurrentStage />
+          </>
         );
       case AppView.AI_ONBOARDING:
         return (
