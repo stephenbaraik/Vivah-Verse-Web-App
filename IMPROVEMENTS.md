@@ -1,274 +1,183 @@
 # Vivah-Verse: Suggestions & Improvements
 
-## 1. Security Improvements ✅ DONE
-- [x] Added environment variable support (`import.meta.env.VITE_API_URL`)
-- [x] Added TypeScript types for authService
-- [x] Added `getAuthHeaders()` helper for authenticated API calls
+## ✅ Completed Refactoring
+- File structure reorganized with `src/` directory
+- Components organized into logical folders (auth, booking, dashboard, landing, layout, planning, tools, vendor, blog, common)
+- Types, constants, and services moved to dedicated folders
+- Build successful: 373.96 kB (gzipped: 103.24 kB)
 
-## 2. Error Handling Improvements ✅ DONE
-- [x] Added loading states for payment processing
-- [x] Replaced `alert()` with inline error messages
-- [x] Added try/catch/finally pattern for cleanup
+## ✅ Fixes Applied
+1. **Security**: Added environment variable support (`import.meta.env.VITE_API_URL`)
+2. **TypeScript**: Added proper types to authService and created `vite-env.d.ts`
+3. **Error Handling**: Improved PaymentScreen with loading states and inline error messages
+4. **Accessibility**: Added ARIA labels, roles, and keyboard navigation support to Hero component
+5. **Performance**: Added React.memo, useMemo, and extracted calendar logic to custom hook
 
-## 3. Performance Optimizations (Recommended)
+## 📈 Additional Performance Improvements
+
+### 1. Hero Component Optimizations ✅ DONE
 ```tsx
-// Add React.memo for frequently re-rendering components
-import { memo } from 'react';
+// Extracted calendar logic to custom hook
+const useCalendar = (selectedDate: string) => {
+  // Reusable calendar state management
+};
 
-export const DashboardOverview = memo(function DashboardOverview({...}) {
-  // Component code
+// Memoized DateCell component
+const DateCell = memo(({ ... }) => {
+  // Prevents unnecessary re-renders
 });
+
+// useMemo for grid cells
+const gridCells = useMemo(() => {
+  // Memoized calculation
+}, [calendar, selectedDate, onDateChange]);
+```
+
+### 2. Auth Screen Improvements ✅ DONE
+- Loading state management
+- Inline error messages instead of alerts
+- Form state reset on mode toggle
+
+### 3. Payment Screen Improvements ✅ DONE
+- Loading state (`isProcessing`)
+- Error state with user-friendly messages
+- Proper try/catch/finally pattern
+
+## 🎯 Next Recommended Improvements
+
+### Code Quality
+```bash
+# Add ESLint and Prettier
+npm install -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser prettier eslint-config-prettier eslint-plugin-prettier
+
+# Add .eslintrc.json
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "prefer-const": "error"
+  }
+}
+```
+
+### State Management (Optional)
+Consider using Zustand for simpler global state:
+```bash
+npm install zustand
 ```
 
 ```tsx
-// Add lazy loading for routes (update App.tsx)
-import { lazy, Suspense } from 'react';
+// src/stores/authStore.ts
+import { create } from 'zustand';
 
-const WeddingPlannerAI = lazy(() => import('./components/planning/WeddingPlannerAI'));
-
-// Usage:
-<Suspense fallback={<LoadingSpinner />}>
-  <WeddingPlannerAI ... />
-</Suspense>
-```
-
-## 4. Accessibility Improvements (Recommended)
-```tsx
-// Add ARIA labels and keyboard navigation
-<button
-  onClick={handleSubmit}
-  disabled={isLoading}
-  aria-busy={isLoading}
-  aria-disabled={isLoading}
->
-  {isLoading ? 'Processing...' : 'Complete Payment'}
-</button>
-
-// Add proper image alt tags
-<img 
-  src={venue.image} 
-  alt={`${venue.name} - ${venue.location}`}
-  loading="lazy"
-/>
-```
-
-## 5. State Management (Recommended)
-Consider using Zustand or React Context for global state:
-
-```tsx
-// src/contexts/AuthContext.tsx
-import { createContext, useContext, useState, ReactNode } from 'react';
-
-interface AuthContextType {
+interface AuthState {
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  user: { email: string } | null;
+  login: (email: string, token: string) => void;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const login = (token: string) => {
+export const useAuthStore = create<AuthState>((set) => ({
+  isAuthenticated: false,
+  user: null,
+  login: (email, token) => {
     localStorage.setItem('authToken', token);
-    setIsAuthenticated(true);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('authToken');
-    setIsAuthenticated(false);
-  };
-
-  return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
-  return context;
-};
-```
-
-## 6. Environment Configuration (Recommended)
-Create `.env.example`:
-```
-VITE_API_URL=http://localhost:5000/api
-VITE_GEMINI_API_KEY=your_api_key_here
-```
-
-## 7. Code Splitting (Recommended)
-Update `src/main.tsx`:
-```tsx
-import React, { Suspense, lazy } from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './index.css';
-
-// Lazy load heavy components
-const WeddingPlannerAI = lazy(() => import('./components/planning/WeddingPlannerAI'));
-
-const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vivah-burgundy"></div>
-  </div>
-);
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <Suspense fallback={<LoadingFallback />}>
-      <App />
-    </Suspense>
-  </React.StrictMode>
-);
-```
-
-## 8. Form Validation (Recommended)
-Add validation using Zod:
-```tsx
-import { z } from 'zod';
-
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-// Usage:
-const result = loginSchema.safeParse({ email, password });
-if (!result.success) {
-  console.log(result.error.errors);
-}
-```
-
-## 9. API Layer (Recommended)
-Create centralized API service:
-
-```tsx
-// src/services/api.ts
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  body?: Record<string, unknown>;
-  requiresAuth?: boolean;
-}
-
-export const api = {
-  async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    const { method = 'GET', body, requiresAuth = false } = options;
-    
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (requiresAuth) {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-    }
-
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message);
-    }
-
-    return response.json();
+    set({ isAuthenticated: true, user: { email } });
   },
+  logout: () => {
+    localStorage.removeItem('authToken');
+    set({ isAuthenticated: false, user: null });
+  },
+}));
+```
 
-  get: <T>(endpoint: string) => api.request<T>(endpoint),
-  post: <T>(endpoint: string, body: Record<string, unknown>) => 
-    api.request<T>(endpoint, { method: 'POST', body }),
+### API Error Handling
+```tsx
+// src/utils/apiErrors.ts
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number,
+    public details
+  ) {
+?: unknown    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+export const handleApiError = (error: unknown): string => {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'An unexpected error occurred';
 };
 ```
 
-## 10. Testing Setup (Recommended)
-Add unit tests:
-
+### Component Testing Setup
 ```bash
-npm install -D vitest @testing-library/react @testing-library/user-event
+npm install -D vitest @testing-library/react @testing-library/user-event jsdom
 ```
 
 ```tsx
-// src/components/__tests__/Button.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { Button } from '../common/Button';
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
 
-describe('Button', () => {
-  it('renders children correctly', () => {
-    render(<Button>Click me</Button>);
-    expect(screen.getByRole('button')).toHaveTextContent('Click me');
-  });
-
-  it('calls onClick when clicked', () => {
-    const handleClick = vi.fn();
-    render(<Button onClick={handleClick}>Click me</Button>);
-    fireEvent.click(screen.getByRole('button'));
-    expect(handleClick).toHaveBeenCalledTimes(1);
-  });
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+  },
 });
 ```
 
-## 11. Environment Variables Check
-Run to verify everything works:
+### Bundle Size Analysis
 ```bash
+npm install -D rollup-plugin-visualizer
+```
+
+```tsx
+// vite.config.ts
+import { visualizer } from 'rollup-plugin-visualizer';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    visualizer({
+      open: true,
+      gzipSize: true,
+    }),
+  ],
+});
+```
+
+## 📊 Current Build Stats
+```
+✓ built in 2.27s
+dist/index.html                  5.78 kB │ gzip: 1.90 kB
+dist/assets/index-BzOacJ6v.js  373.96 kB │ gzip: 103.24 kB
+```
+
+## 🚀 Quick Start
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
 npm run build
-```
 
-Build should complete successfully:
-```
-✓ built in 2.85s
-dist/index.html                  5.78 kB │ gzip:   1.90 kB
-dist/assets/index-CSQos9r4.js  372.43 kB │ gzip: 102.78 kB
-```
-
-## 12. Additional Component Improvements
-
-### Add loading skeleton for better UX:
-```tsx
-// src/components/common/Skeleton.tsx
-export const Skeleton = ({ className }: { className?: string }) => (
-  <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
-);
-
-// Usage in Dashboard:
-{isLoading ? (
-  <>
-    <Skeleton className="h-32 mb-4" />
-    <Skeleton className="h-64" />
-  </>
-) : (
-  <DashboardContent />
-)}
-```
-
-### Add toast notifications:
-```bash
-npm install react-hot-toast
-```
-
-```tsx
-// In components:
-import toast from 'react-hot-toast';
-
-const handleLogin = async () => {
-  const promise = authService.login(email, password);
-  toast.promise(promise, {
-    loading: 'Logging in...',
-    success: 'Welcome back!',
-    error: 'Invalid credentials',
-  });
-};
+# Preview production build
+npm run preview
 ```
 

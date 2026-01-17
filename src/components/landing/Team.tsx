@@ -6,32 +6,32 @@ export const Team: React.FC = () => {
     {
       name: 'Krish Dhiliwal',
       role: 'CEO, Founder',
-      image: 'https://via.placeholder.com/150',
+      image: '/images/team/Krish Pic.jpeg',
     },
     {
       name: 'Aarav Pillay',
       role: 'CFO, Co-founder',
-      image: 'https://via.placeholder.com/150',
+      image: '/images/team/aarav.jpg',
     },
     {
       name: 'Tanisha Ghosh',
       role: 'Creative head, Co-founder',
-      image: 'https://via.placeholder.com/150',
+      image: '/images/team/Tanisha Pic.jpg',
     },
     {
       name: 'Stephen Baraik',
       role: 'CTO',
-      image: 'https://via.placeholder.com/150',
+      image: '/images/team/Stephen Pic.PNG',
     },
     {
       name: 'Sneha Das',
       role: 'Customer relations manager',
-      image: 'https://via.placeholder.com/150',
+      image: '/images/team/Sneha Pic.jpeg',
     },
     {
       name: 'Anam Shaikh',
       role: 'Vendor relations manager',
-      image: 'https://via.placeholder.com/150',
+      image: '/images/team/Anam Pic.jpg',
     },
   ];
 
@@ -47,7 +47,7 @@ export const Team: React.FC = () => {
             <img
               src={member.image}
               alt={member.name}
-              className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white shadow-lg"
+              className="w-40 h-40 rounded-full mx-auto mb-4 border-4 border-white shadow-lg object-cover object-center"
             />
             <h3 className="text-xl font-bold text-vivah-burgundy">{member.name}</h3>
             <p className="text-gray-600">{member.role}</p>

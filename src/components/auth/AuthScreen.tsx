@@ -75,7 +75,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onSuccess, onCancel }) =
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-vivah-stem/10 rounded-full blur-2xl -ml-10 -mb-10"></div>
 
         <div className="relative z-10 flex flex-col items-center text-center">
-          <img src={LOGO_URL} alt="Logo" className="w-16 h-16 mb-4 drop-shadow-md" />
+          <img src={LOGO_URL} alt="Logo" className="w-16 h-auto object-contain mb-4 drop-shadow-md" />
           <h2 className="text-3xl font-bold text-vivah-burgundy mb-2">
             {isLogin ? 'Welcome Back' : 'Create Your Account'}
           </h2>

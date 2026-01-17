@@ -14,7 +14,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="space-y-4">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate(AppView.HOME)}>
-              <img src={LOGO_URL} alt="Logo" className="w-10 h-10" />
+              <img src={LOGO_URL} alt="Logo" className="w-10 h-auto object-contain" />
               <span className="text-2xl font-script font-bold text-vivah-burgundy">{APP_NAME}</span>
             </div>
             <p className="text-sm leading-relaxed max-w-xs">

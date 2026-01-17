@@ -1,7 +1,7 @@
 import { Venue, VendorService, WeddingPackage, PackageTier, ShagunTransaction } from '../types';
 
-// SVG Data URI for the Pink Lily Logo
-export const LOGO_URL = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjRjQ4RkIxIiBkPSJNMjU2IDQ0LjhjLTI5LjYgMC01NS40IDE1LjYtNzAuMiAzOS42LTE2LjIgMjYuMi0xNi42IDU5LjQtMS4yIDg2TDc1LjYgMjIwLjRjLTI2LjYtMTUuNC01OS44LTE1LTE4Ni40IDEuMi0yNCAxNC44LTM5LjYgNDAuNi0zOS42IDcwLjYgNTEuOC02IDM2LjYtMTcuMi01MS44bC0xMi42LTE0MCAxMDkuMiA4OC42YzExLjYnMTYuNCAyOS42IDI1LjYgNDguMiAyNS42IDExIDAgMjEuOC0zLjIgMzEuNi05LjQgMjQtMTQuOCAzOS42LTQwLjYgMzkuNi03MC4ycy0xNS42LTU1LjQtMzkuNi03MC4yYy0yNi42LTE2LjItNTkuOC0xNi42LTg2LjQtMS4ybC0xMDktNTAgOTEuNC01MC4yYzE1LjQtMjYuNiAxNS01OS44LTEuMi04Ni0xNC44LTI0LTQwLjYtMzkuNi03MC4yLTM5LjZ6IiBvcGFjaXR5PSIwLjkiLz48cGF0aCBmaWxsPSIjMkU3RDMyIiBkPSJNMjU2IDI4OGMtNC40IDAtOC0zLjYtOC04di04MGMwLTQuNCAzLjYtOCA4LThzOCAzLjYgOCA4djgwYzAgNC40LTMuNiA4LTggOHoiLz48cGF0aCBmaWxsPSIjMkU3RDMyIiBkPSJNMjU2IDI4OGMtMy42IDAtNy4yLTIuMi04LjgtNi4ybC0zMi04MGMtMS42LTQuMi40LTkuMiA0LjYtMTAuOCA0LjItMS42IDkuMi40IDEwLjggNC42bDI5LjQgNzMuNCAyOS40LTczLjRjMS42LTQuMiA2LjYtNi4yIDEwLjgtNC42IDQuMiAxLjYgNi4yIDYuNiA0LjYgMTAuOGwtMzIgODBjLTEuNiA0LTUuMiA2LjItOC44IDYuMnoiLz48ZWxsaXBzZSBjeD0iMjU2IiBjeT0iMTg0IiByeD0iMTIiIHJ5PSIyMCIgZmlsbD0iIzg4MEU0RiIvPjxlbGxpcHNlIGN4PSIyMTAiIGN5PSIyMDAiIHJ4PSIxMiIgcnk9IjIwIiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgMjEwIDIwMCkiIGZpbGw9IiM4ODBFNEYiLz48ZWxsaXBzZSBjeD0iMzAyIiBjeT0iMjAwIiByeD0iMTIiIHJ5PSIyMCIgdHJhbnNmb3JtPSJyb3RhdGUoMjAgMzAyIDIwMCkiIGZpbGw9IiM4ODBFNEYiLz48L3N2Zz4=`;
+// Local logo image path
+export const LOGO_URL = '/images/vivah-logo.png';
 
 // Helper to check for auspicious dates (Mock logic: Weekends are auspicious)
 export const isAuspiciousDate = (date: Date): boolean => {
@@ -232,4 +232,17 @@ export const MOCK_SHAGUN_TRANSACTIONS: ShagunTransaction[] = [
 
 export const APP_NAME = "Vivah Verse";
 export const APP_DESCRIPTION = "Simplifying your journey from 'Yes' to 'I Do'.";
+
+// Local image paths - place your images in /public/images/
+export const IMAGES = {
+  LOGO: '/images/vivah-logo.png',
+  TEAM: {
+    KRISH: '/images/team/Krish Pic.jpeg',
+    AARAV: '/images/team/aarav.jpg',
+    TANISHA: '/images/team/Tanisha Pic.jpg',
+    STEPHEN: '/images/team/Stephen Pic.PNG',
+    SNEHA: '/images/team/Sneha Pic.jpeg',
+    ANAM: '/images/team/Anam Pic.jpg',
+  }
+};
 

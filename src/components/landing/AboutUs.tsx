@@ -1,6 +1,7 @@
 import React from 'react';
 import { GlassCard } from '../common/GlassCard';
 import { Briefcase, FileText, UserCheck, CreditCard } from 'lucide-react';
+import { Team } from './Team';
 
 export const AboutUs: React.FC = () => {
   return (
@@ -53,6 +54,8 @@ export const AboutUs: React.FC = () => {
           </p>
         </div>
       </div>
+
+      <Team />
     </div>
   );
 };

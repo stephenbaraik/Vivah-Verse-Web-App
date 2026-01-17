@@ -167,7 +167,6 @@ function App() {
             <Solution />
             <BusinessModel />
             <Sustainability />
-            <Team />
             <TargetAudience />
             <CurrentStage />
           </>
@@ -301,7 +300,9 @@ function App() {
       case AppView.INSPIRATION:
         return <InspirationBoard userPreferences={preferences} />;
       case AppView.ABOUT:
-        return <AboutUs />;
+        return (
+          <AboutUs />
+        );
       case AppView.CONTACT:
         return <ContactUs />;
       case AppView.BLOG:

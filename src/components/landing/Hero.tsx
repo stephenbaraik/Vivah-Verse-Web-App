@@ -1,26 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, memo, ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { GlassCard } from '../common/GlassCard';
 import { isAuspiciousDate, isBookedDate } from '../../constants';
 
-interface HeroProps {
-  selectedDate: string;
-  onDateChange: (date: string) => void;
-  onStart: () => void;
-}
-
-export const Hero: React.FC<HeroProps> = ({ 
-  selectedDate, 
-  onDateChange, 
-  onStart 
-}) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+// Extracted calendar logic helper
+const useCalendar = (selectedDate: string) => {
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   
   useEffect(() => {
     if (selectedDate) {
       setCurrentDate(new Date(selectedDate));
     }
-  }, []);
+  }, [selectedDate]);
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -35,64 +26,135 @@ export const Hero: React.FC<HeroProps> = ({
   };
 
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
-  const handleDateClick = (day: number) => {
+  const handleDateClick = (day: number, onDateChange: (date: string) => void) => {
     const newDateStr = formatDate(currentDate.getFullYear(), currentDate.getMonth(), day);
     onDateChange(newDateStr);
   };
 
+  return {
+    currentDate,
+    handlePrevMonth,
+    handleNextMonth,
+    handleDateClick,
+    formatDate,
+    getDaysInMonth,
+    getFirstDayOfMonth,
+  };
+};
+
+// Memoized Date Cell Component for performance
+const DateCell = memo(({ 
+  day, 
+  currentDate, 
+  selectedDate, 
+  onDateClick,
+  formatDate,
+  getDaysInMonth,
+  getFirstDayOfMonth 
+}: {
+  day: number;
+  currentDate: Date;
+  selectedDate: string;
+  onDateClick: (day: number) => void;
+  formatDate: (y: number, m: number, d: number) => string;
+  getDaysInMonth: (d: Date) => number;
+  getFirstDayOfMonth: (d: Date) => number;
+}) => {
+  const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+  const dateString = formatDate(currentDate.getFullYear(), currentDate.getMonth(), day);
+  const isSelected = selectedDate === dateString;
+  const today = useMemo(() => new Date(), []);
+  today.setHours(0, 0, 0, 0);
+  const isPast = dateToCheck < today;
+  const isBooked = isBookedDate(dateToCheck);
+  const isGold = isAuspiciousDate(dateToCheck);
+
+  const baseClass = `
+    h-12 w-12 rounded-full flex items-center justify-center text-lg font-medium transition-all duration-300 relative group
+    ${isSelected 
+      ? 'bg-gradient-gold text-white shadow-lg animate-pop-in z-10' 
+      : isPast 
+        ? 'text-gray-200 cursor-not-allowed' 
+        : isBooked
+          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          : isGold
+             ? 'border-2 border-vivah-gold/40 text-vivah-gold hover:bg-vivah-gold hover:text-white font-bold'
+             : 'text-vivah-burgundy/80 hover:bg-vivah-petal hover:scale-110'
+    }
+  `;
+
+  return (
+    <button
+      onClick={() => !isPast && !isBooked && onDateClick(day)}
+      disabled={isPast || isBooked}
+      className={baseClass}
+      aria-label={`Select date: ${dateString}`}
+      aria-selected={isSelected}
+      aria-disabled={isPast || isBooked}
+    >
+      {day}
+      {isGold && !isBooked && !isPast && !isSelected && (
+        <span className="absolute -top-1 -right-1 w-2 h-2 bg-vivah-gold rounded-full" aria-hidden="true" />
+      )}
+    </button>
+  );
+});
+
+DateCell.displayName = 'DateCell';
+
+interface HeroProps {
+  selectedDate: string;
+  onDateChange: (date: string) => void;
+  onStart: () => void;
+}
+
+export const Hero: React.FC<HeroProps> = memo(({ 
+  selectedDate, 
+  onDateChange, 
+  onStart 
+}) => {
+  const calendar = useCalendar(selectedDate);
+  const today = useMemo(() => new Date(), []);
+  today.setHours(0, 0, 0, 0);
+  
   const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-  const totalDays = getDaysInMonth(currentDate);
-  const startDay = getFirstDayOfMonth(currentDate);
-  const today = new Date();
-  today.setHours(0,0,0,0);
+  // Generate calendar grid cells
+  const gridCells = useMemo(() => {
+    const cells: React.ReactNode[] = [];
+    const totalDays = calendar.getDaysInMonth(calendar.currentDate);
+    const startDay = calendar.getFirstDayOfMonth(calendar.currentDate);
 
-  const gridCells = [];
-  for (let i = 0; i < startDay; i++) {
-    gridCells.push(<div key={`empty-${i}`} className="h-12 w-12"></div>);
-  }
-  for (let d = 1; d <= totalDays; d++) {
-    const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), d);
-    const dateString = formatDate(currentDate.getFullYear(), currentDate.getMonth(), d);
-    const isSelected = selectedDate === dateString;
-    const isPast = dateToCheck < today;
-    const isBooked = isBookedDate(dateToCheck);
-    const isGold = isAuspiciousDate(dateToCheck);
+    // Empty cells for days before first day of month
+    for (let i = 0; i < startDay; i++) {
+      cells.push(<div key={`empty-${i}`} className="h-12 w-12" />);
+    }
 
-    gridCells.push(
-      <button
-        key={d}
-        onClick={() => !isPast && !isBooked && handleDateClick(d)}
-        disabled={isPast || isBooked}
-        className={`
-          h-12 w-12 rounded-full flex items-center justify-center text-lg font-medium transition-all duration-300 relative group
-          ${isSelected 
-            ? 'bg-gradient-gold text-white shadow-lg animate-pop-in z-10' 
-            : isPast 
-              ? 'text-gray-200 cursor-not-allowed' 
-              : isBooked
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : isGold
-                   ? 'border-2 border-vivah-gold/40 text-vivah-gold hover:bg-vivah-gold hover:text-white font-bold'
-                   : 'text-vivah-burgundy/80 hover:bg-vivah-petal hover:scale-110'
-          }
-        `}
-      >
-        {d}
-        {isGold && !isBooked && !isPast && !isSelected && (
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-vivah-gold rounded-full"></span>
-        )}
-      </button>
-    );
-  }
+    // Day cells
+    for (let d = 1; d <= totalDays; d++) {
+      cells.push(
+        <DateCell
+          key={d}
+          day={d}
+          currentDate={calendar.currentDate}
+          selectedDate={selectedDate}
+          onDateClick={(day) => calendar.handleDateClick(day, onDateChange)}
+          formatDate={calendar.formatDate}
+          getDaysInMonth={calendar.getDaysInMonth}
+          getFirstDayOfMonth={calendar.getFirstDayOfMonth}
+        />
+      );
+    }
+    return cells;
+  }, [calendar, selectedDate, onDateChange]);
 
   return (
     <div className="w-full flex flex-col gap-40 pb-32">
@@ -117,6 +179,7 @@ export const Hero: React.FC<HeroProps> = ({
             <button 
               onClick={() => window.scrollTo({ top: 900, behavior: 'smooth' })}
               className="hidden lg:flex items-center gap-3 text-lg font-bold uppercase tracking-widest text-vivah-burgundy/40 hover:text-vivah-gold transition-all hover:gap-6 group"
+              aria-label="Explore more features"
             >
               Explore More <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
             </button>
@@ -129,31 +192,39 @@ export const Hero: React.FC<HeroProps> = ({
                 <div className="flex items-end justify-between border-b border-gray-100 pb-8">
                   <div>
                     <span className="text-sm font-bold text-vivah-gold uppercase tracking-widest block mb-2">Select Auspicious Date</span>
-                    <span className="text-4xl font-light text-vivah-burgundy">{months[currentDate.getMonth()]} {currentDate.getFullYear()}</span>
+                    <span className="text-4xl font-light text-vivah-burgundy">{months[calendar.currentDate.getMonth()]} {calendar.currentDate.getFullYear()}</span>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={handlePrevMonth} className="p-3 rounded-full hover:bg-white text-vivah-burgundy/60 hover:text-vivah-burgundy transition-colors hover:shadow-md">
+                    <button 
+                      onClick={calendar.handlePrevMonth} 
+                      className="p-3 rounded-full hover:bg-white text-vivah-burgundy/60 hover:text-vivah-burgundy transition-colors hover:shadow-md"
+                      aria-label="Previous month"
+                    >
                       <ChevronLeft size={24} />
                     </button>
-                    <button onClick={handleNextMonth} className="p-3 rounded-full hover:bg-white text-vivah-burgundy/60 hover:text-vivah-burgundy transition-colors hover:shadow-md">
+                    <button 
+                      onClick={calendar.handleNextMonth} 
+                      className="p-3 rounded-full hover:bg-white text-vivah-burgundy/60 hover:text-vivah-burgundy transition-colors hover:shadow-md"
+                      aria-label="Next month"
+                    >
                       <ChevronRight size={24} />
                     </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-7 gap-y-4 gap-x-2 text-center">
+                <div className="grid grid-cols-7 gap-y-4 gap-x-2 text-center" role="grid" aria-label="Calendar">
                   {daysOfWeek.map(day => (
-                    <div key={day} className="text-xs font-bold text-vivah-burgundy/30 uppercase mb-3 tracking-widest">
+                    <div key={day} className="text-xs font-bold text-vivah-burgundy/30 uppercase mb-3 tracking-widest" role="columnheader">
                       {day}
                     </div>
                   ))}
                   {gridCells}
                 </div>
 
-                <div className="flex items-center gap-4 text-xs text-vivah-burgundy/60 justify-center">
-                  <div className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-vivah-gold"></span> Muhurat</div>
-                  <div className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-vivah-burgundy/80"></span> Available</div>
-                  <div className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-gray-300"></span> Booked</div>
+                <div className="flex items-center gap-4 text-xs text-vivah-burgundy/60 justify-center" role="list" aria-label="Legend">
+                  <div className="flex items-center gap-1" role="listitem"><span className="w-3 h-3 rounded-full bg-vivah-gold" aria-hidden="true"></span> Muhurat</div>
+                  <div className="flex items-center gap-1" role="listitem"><span className="w-3 h-3 rounded-full bg-vivah-burgundy/80" aria-hidden="true"></span> Available</div>
+                  <div className="flex items-center gap-1" role="listitem"><span className="w-3 h-3 rounded-full bg-gray-300" aria-hidden="true"></span> Booked</div>
                 </div>
 
                 <div className="pt-4">
@@ -167,6 +238,7 @@ export const Hero: React.FC<HeroProps> = ({
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }
                     `}
+                    aria-disabled={!selectedDate}
                   >
                     Begin Journey <ArrowRight size={22} />
                   </button>
@@ -178,5 +250,7 @@ export const Hero: React.FC<HeroProps> = ({
       </div>
     </div>
   );
-};
+});
+
+Hero.displayName = 'Hero';
 

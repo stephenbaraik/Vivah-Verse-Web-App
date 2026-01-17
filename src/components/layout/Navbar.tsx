@@ -44,8 +44,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, hasActi
             className="flex items-center gap-4 cursor-pointer group" 
             onClick={() => handleNav(AppView.HOME)}
           >
-            <div className={`w-14 h-14 relative opacity-90 group-hover:opacity-100 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110 ${clickedItem === AppView.HOME ? 'pop-nav-item' : ''}`}>
-              <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain" />
+            <div className={`w-20 h-20 relative opacity-90 group-hover:opacity-100 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110 ${clickedItem === AppView.HOME ? 'pop-nav-item' : ''}`}>
+              <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain p-1" />
             </div>
             <span className="text-3xl font-medium tracking-tight text-vivah-burgundy">
               {APP_NAME}
