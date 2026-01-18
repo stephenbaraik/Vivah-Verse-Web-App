@@ -1,0 +1,62 @@
+# Docker Compose for local development
+version: '3.8'
+
+services:
+  # Frontend + Backend combined
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-development-secret-key-change-in-production}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - VITE_API_URL=/api/auth
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Development backend (hot reload)
+  backend-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - JWT_SECRET=${JWT_SECRET:-development-secret-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - PORT=5000
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+    command: npm run dev
+
+  # Development frontend (hot reload)
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/src
+    environment:
+      - VITE_API_URL=http://localhost:5000/api/auth
+      - VITE_GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    command: npm run dev
+
+networks:
+  default:
+    name: vivah-verse-network
+
